@@ -1,5 +1,9 @@
+
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
+import 'package:websocketclient/controller/notification_controller.dart';
+import 'dart:convert';
 class Home extends StatefulWidget {
   const Home({super.key});
 
@@ -8,13 +12,13 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-
   late PusherChannelsFlutter pusher;
 
   @override
   void initState() {
     super.initState();
     InitNotifications();
+    
   }
   void InitNotifications()async{
     pusher =await PusherChannelsFlutter.getInstance();
@@ -30,8 +34,9 @@ class _HomeState extends State<Home> {
     final myChannel = await pusher.subscribe(
       channelName: "notifications",
       onEvent:(event){
-        print(event);
-
+        print(event.data);
+        Map<String, dynamic> dataMap = jsonDecode(event.data);
+        NotificationController.createNewNotification(title:dataMap['title'],description:dataMap['description']);
       },
       //onEvent:onEvent,
       onSubscriptionError: onSubscriptionError
@@ -47,7 +52,7 @@ class _HomeState extends State<Home> {
   print("onError: $message code: $code exception: $e");
 }
   void onEvent(dynamic event) {
-    print("Event: "+event);
+    print("Event: "+event.data);
   }
 
   void onSubscriptionError(String message, dynamic e) {
@@ -59,4 +64,5 @@ class _HomeState extends State<Home> {
       body: Center(child: Text("Listning....")),
     );
   }
+  
 }
